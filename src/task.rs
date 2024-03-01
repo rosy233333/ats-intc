@@ -8,7 +8,7 @@ use core::{
 };
 use crossbeam::atomic::AtomicCell;
 
-use crate::from_task;
+use crate::{new_waker, AtsDriver};
 
 /// 
 #[repr(u32)]
@@ -111,8 +111,8 @@ impl Task {
     }
 
     /// poll the inner future
-    pub fn poll_inner(self: Arc<Self>) -> Poll<i32> {
-        let waker = unsafe { from_task(self.clone().as_ref()) };
+    pub fn poll_inner(self: Arc<Self>, hw: AtsDriver, process_id: usize) -> Poll<i32> {
+        let waker = unsafe { new_waker(self.clone().as_ref(), hw, process_id) };
         let mut context = Context::from_waker(&waker);
         unsafe { (&mut *self.fut.as_ptr()).as_mut().poll(&mut context) }
     }

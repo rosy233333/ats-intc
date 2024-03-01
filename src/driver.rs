@@ -24,7 +24,7 @@ use ats_intc_pac::*;
 
 use super::{TaskRef, Task};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct AtsDriver(usize);
 
 impl AtsDriver {
