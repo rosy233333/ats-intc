@@ -8,171 +8,152 @@
   <description>Asynchronous task scheduler and Interrupt controller description</description>
 
   <addressUnitBits>8</addressUnitBits>                  <!-- byte addressable memory -->
-  <width>32</width>                                     <!-- bus width is 32 bits -->
-  <size>32</size>                                       <!-- this is the default size (number of bits) of all peripherals
+  <width>64</width>                                     <!-- bus width is 64 bits -->
+  <size>64</size>                                       <!-- this is the default size (number of bits) of all peripherals
                                                                        and register that do not define "size" themselves -->
-  <resetValue>0x00000000</resetValue>                   <!-- by default all bits of the registers are initialized to 0
+  <resetValue>0x0000000000000000</resetValue>                   <!-- by default all bits of the registers are initialized to 0
   on reset -->
-  <resetMask>0xFFFFFFFF</resetMask>                     <!-- by default all 32Bits of the registers are used -->
+  <resetMask>0xFFFFFFFFFFFFFFFF</resetMask>                     <!-- by default all 32Bits of the registers are used -->
 
   <peripherals>
     <!-- axi_dma_0 -->
     <peripheral>
       <name>ATS-INTC</name>
-      <description>Asynchronous task scheduler and Interrupt controller description</description>
-      <baseAddress>0x60040000</baseAddress>     <!-- mmio baseaddr -->
-      <size>32</size>            <!-- default bit-width of any register contained in the device -->
+      <description>Asynchronous task scheduler, IPC controller and Interrupt controller description</description>
+      <baseAddress>0xF000000</baseAddress>     <!-- mmio baseaddr -->
+      <size>64</size>            <!-- default bit-width of any register contained in the device -->
       <addressBlock>
         <offset>0x0</offset>
-        <size>0x1000</size>
+        <size>0x1000000</size>
         <usage>registers</usage>
       </addressBlock>
+
       <registers>
-        <register>
-          <name>control</name>
-          <description>The transaction control register</description>
+        <cluster>
+          <dim>4093</dim>
+          <dimIncrement>0x1000</dimIncrement>
+          <dimName>processes</dimName>
+          <name>process%s</name>
+          <description>Related registers of one process</description>
           <addressOffset>0x0</addressOffset>
           <access>read-write</access>
-          <fields>
-            <field>
-              <name>reset</name>
-              <description>Software reset for reseting the executor channel</description>
-              <bitRange>[0:0]</bitRange>
-              <enumeratedValues>
-                <enumeratedValue>
-                  <name>complete</name>
-                  <value>0x0</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>Reset</name>
-                  <value>0x1</value>
-                </enumeratedValue>
-              </enumeratedValues>
-            </field>
-            <field>
-              <name>lhandler</name>
-              <description>Software load handler task flag</description>
-              <bitRange>[1:1]</bitRange>
-              <enumeratedValues>
-                <enumeratedValue>
-                  <name>complete</name>
-                  <value>0x0</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>load</name>
-                  <value>0x1</value>
-                </enumeratedValue>
-              </enumeratedValues>
-            </field>
-            <field>
-              <name>stask</name>
-              <description>Software store task flag</description>
-              <bitRange>[2:2]</bitRange>
-              <enumeratedValues>
-                <enumeratedValue>
-                  <name>complete</name>
-                  <value>0x0</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>start</name>
-                  <value>0x1</value>
-                </enumeratedValue>
-              </enumeratedValues>
-            </field>
-            <field>
-              <name>ftask</name>
-              <description>Software fetch task flag</description>
-              <bitRange>[3:3]</bitRange>
-              <enumeratedValues>
-                <enumeratedValue>
-                  <name>complete</name>
-                  <value>0x0</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>start</name>
-                  <value>0x1</value>
-                </enumeratedValue>
-              </enumeratedValues>
-            </field>
-            <field>
-              <name>memcache</name>
-              <description>When initializing, the software will alloc a memory area and set it as the Executor cache.</description>
-              <bitRange>[4:4]</bitRange>
-              <enumeratedValues>
-                <enumeratedValue>
-                  <name>complete</name>
-                  <value>0x0</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>start</name>
-                  <value>0x1</value>
-                </enumeratedValue>
-              </enumeratedValues>
-            </field>
-          </fields>
-        </register>
 
-        <register>
-          <name>stask_lsb</name>
-          <description>When the software store the task, it will write the register.(LSB)</description>
-          <addressOffset>0x4</addressOffset>
-          <access>read-write</access>
-        </register>
-        <register>
-          <name>stask_msb</name>
-          <description>When the software store the task, it will write the register.(MSB)</description>
-          <addressOffset>0x8</addressOffset>
-          <access>read-write</access>
-        </register>
-        <register>
-          <name>ftask_lsb</name>
-          <description>When the software fetch task, it will read from this register.(LSB)</description>
-          <addressOffset>0xc</addressOffset>
-          <access>read-write</access>
-        </register>
-        <register>
-          <name>ftask_msb</name>
-          <description>When the software fetch task, it will read from this register.(MSB)</description>
-          <addressOffset>0x10</addressOffset>
-          <access>read-write</access>
-        </register>
-        <register>
-          <name>handler_lsb</name>
-          <description>The handler task pointer lsb</description>
-          <addressOffset>0x14</addressOffset>
-          <access>read-write</access>
-        </register>
-        <register>
-          <name>handler_msb</name>
-          <description>The handler task pointer msb</description>
-          <addressOffset>0x18</addressOffset>
-          <access>read-write</access>
-        </register>
-        <register>
-          <name>irq</name>
-          <description>The irq register, when the software store handler task, it will write the relative irq.</description>
-          <addressOffset>0x1c</addressOffset>
-          <access>read-write</access>
-        </register>
-        <register>
-          <name>memcache_lsb</name>
-          <description>The in-memory cache address.(LSB)</description>
-          <addressOffset>0x20</addressOffset>
-          <access>read-write</access>
-        </register>
-        <register>
-          <name>memcache_Msb</name>
-          <description>The in-memory cache address.(MSB)</description>
-          <addressOffset>0x24</addressOffset>
-          <access>read-write</access>
-        </register>
-        <register>
-          <name>priority</name>
-          <description>The task priority.</description>
-          <addressOffset>0x28</addressOffset>
-          <access>read-write</access>
-        </register>
+          <cluster>
+            <name>ats</name>
+            <description>Async task scheduler of one process</description>
+            <addressOffset>0x0</addressOffset>
+            <access>read-write</access>
 
+            <register>
+              <dim>4</dim>
+              <dimIncrement>0x8</dimIncrement>
+              <dimName>control</dimName>
+              <name>control-byte%s</name>
+              <description>Control field of the Async task scheduler</description>
+              <addressOffset>0x0</addressOffset>
+              <access>read-write</access>
+              <dataType>uint64_t</dataType>
+            </register>
+
+            <register>
+              <name>membuf</name>
+              <description>Memory buffer of the Async task scheduler</description>
+              <addressOffset>0x20</addressOffset>
+              <access>write-only</access>
+              <dataType>uint64_t</dataType>
+            </register>
+
+            <register>
+              <name>dequeue</name>
+              <description>Deque position of the Async task scheduler</description>
+              <addressOffset>0x28</addressOffset>
+              <access>read-only</access>
+              <dataType>uint64_t</dataType>
+            </register>
+
+            <register>
+              <dim>250</dim>
+              <dimIncrement>0x8</dimIncrement>
+              <dimName>enqueue-regs</dimName>
+              <name>enqueue%s</name>
+              <description>Enqueue position of the Async task scheduler</description>
+              <addressOffset>0x30</addressOffset>
+              <access>write-only</access>
+              <dataType>uint64_t</dataType>
+            </register>
+          </cluster>
+
+          <cluster>
+            <name>ipcc</name>
+            <description>IPC controller of one process</description>
+            <addressOffset>0x800</addressOffset>
+            <access>read-write</access>
+
+            <register>
+              <name>control</name>
+              <description>Control field of the IPC controller</description>
+              <addressOffset>0x0</addressOffset>
+              <access>read-write</access>
+              <dataType>uint64_t</dataType>
+            </register>
+
+            <register>
+              <name>membuf</name>
+              <description>Membuf field of the IPC controller</description>
+              <addressOffset>0x8</addressOffset>
+              <access>write-only</access>
+              <dataType>uint64_t</dataType>
+            </register>
+
+            <register>
+              <name>ipc-message</name>
+              <description>IPC message pointer of the IPC controller</description>
+              <addressOffset>0x10</addressOffset>
+              <access>read-write</access> <!--因为不知道这些IPC控制器里的寄存器的用途，我都把access设定成read-write了-->
+              <dataType>uint64_t</dataType>
+            </register>
+
+            <register>
+              <dim>16</dim>
+              <dimIncrement>0x8</dimIncrement>
+              <dimName>ipc-bq-regs</dimName>
+              <name>ipc-bq%s</name>
+              <description>BQ field of the IPC controller</description>
+              <addressOffset>0x18</addressOffset>
+              <access>read-write</access>
+              <dataType>uint64_t</dataType>
+            </register>
+          </cluster>
+        </cluster>
+
+        <cluster>
+          <name>intc</name>
+          <description>Interrupt controller</description>
+          <addressOffset>0xFFD000</addressOffset>
+          <access>read-write</access>
+
+          <register>
+            <dim>16</dim>
+            <dimIncrement>0x8</dimIncrement>
+            <dimName>control</dimName>
+            <name>control-byte%s</name>
+            <description>Control field of the Interrupt controller</description>
+            <addressOffset>0x0</addressOffset>
+            <access>read-write</access>
+            <dataType>uint64_t</dataType>
+          </register>
+
+          <register>
+            <dim>1024</dim>
+            <dimIncrement>0x8</dimIncrement>
+            <dimName>enqueue-regs</dimName>
+            <name>enqueue%s</name>
+            <description>Enqueue position of the Interrupt controller</description>
+            <addressOffset>0x80</addressOffset>
+            <access>write-only</access>
+            <dataType>uint64_t</dataType>
+          </register>
+        </cluster>
       </registers>
     </peripheral>
   </peripherals>

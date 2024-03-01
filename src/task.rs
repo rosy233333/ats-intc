@@ -112,9 +112,9 @@ impl Task {
 
     /// poll the inner future
     pub fn poll_inner(self: Arc<Self>) -> Poll<i32> {
-        let waker = unsafe { from_task(self.as_ref()) };
+        let waker = unsafe { from_task(self.clone().as_ref()) };
         let mut context = Context::from_waker(&waker);
-        (self.fut.as_ptr() as &mut Pin<Box<dyn Future<Output = i32> + 'static + Send + Sync>>).as_mut().poll(&mut context)
+        unsafe { (&mut *self.fut.as_ptr()).as_mut().poll(&mut context) }
     }
 }
 

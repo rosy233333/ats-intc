@@ -30,7 +30,7 @@ prio-level-8 = []
 
 prio-level-16 = []
 
-default = ["lock-free-simul", "prio-level-8"]
+default = ["no-simul", "prio-level-8"]
 
 
 
