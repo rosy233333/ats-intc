@@ -28,15 +28,15 @@ use super::{TaskRef, Task};
 pub struct AtsDriver(usize);
 
 impl AtsDriver {
-    #[cfg(any(feature = "locked-simul", feature = "lock-free-simul"))]
+    #[cfg(any(feature = "locked-simul", feature = "lock-free-simul", feature = "no-simul"))]
     pub fn new(base_addr: usize) -> Self {
         Self(base_addr)
     }
 
-    #[cfg(feature = "no-simul")]
-    pub fn new() -> Self {
-        Self(ATS_BASE_ADDR)
-    }
+    // #[cfg(feature = "no-simul")]
+    // pub fn new() -> Self {
+    //     Self(ATS_BASE_ADDR)
+    // }
 
     /// the mmio registers 
     fn regs(&self) -> &'static atsintc::RegisterBlock {
