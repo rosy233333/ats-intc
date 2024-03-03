@@ -4,11 +4,11 @@
 
 use alloc::{boxed::Box, sync::Arc};
 use core::{
-    future::Future,
-    ptr::NonNull,
-    sync::atomic::{AtomicU32, Ordering},
+    borrow::BorrowMut, future::Future, pin::Pin, ptr::NonNull, sync::atomic::{AtomicU32, Ordering}, task::{Context, Poll}
 };
 use crossbeam::atomic::AtomicCell;
+
+use crate::{new_waker, AtsDriver};
 
 /// 
 #[repr(u32)]
@@ -35,7 +35,7 @@ unsafe impl Sync for TaskRef {}
 impl TaskRef {
 
     /// Safety: The pointer must have been obtained with `Task::as_ptr`
-    pub(crate) unsafe fn from_ptr(ptr: *const Task) -> Self {
+    pub unsafe fn from_ptr(ptr: *const Task) -> Self {
         Self {
             ptr: NonNull::new_unchecked(ptr as *mut Task),
         }
@@ -75,13 +75,13 @@ pub struct Task {
     ///
     pub task_type: TaskType,
     /// 
-    pub fut: AtomicCell<Box<dyn Future<Output = i32> + 'static + Send + Sync>>,
+    pub fut: AtomicCell<Pin<Box<dyn Future<Output = i32> + 'static + Send + Sync>>>,
 }
 
 impl Task {
     /// Create a new Task, in not-spawned state.
     pub fn new(
-        fut: Box<dyn Future<Output = i32> + 'static + Send + Sync>,
+        fut: Pin<Box<dyn Future<Output = i32> + 'static + Send + Sync>>,
         priority: u32,
         task_type: TaskType,
     ) -> TaskRef {
@@ -108,6 +108,13 @@ impl Task {
     pub fn from_ref(task_ref: TaskRef) -> Arc<Self> {
         let raw_ptr = task_ref.as_ptr();
         unsafe { Arc::from_raw(raw_ptr) }
+    }
+
+    /// poll the inner future
+    pub fn poll_inner(self: Arc<Self>, hw: AtsDriver, process_id: usize) -> Poll<i32> {
+        let waker = unsafe { new_waker(self.clone().as_ref(), hw, process_id) };
+        let mut context = Context::from_waker(&waker);
+        unsafe { (&mut *self.fut.as_ptr()).as_mut().poll(&mut context) }
     }
 }
 
