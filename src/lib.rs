@@ -2,6 +2,8 @@
 //!
 
 #![no_std]
+#![feature(const_nonnull_new)]
+#![feature(const_option)]
 #![deny(missing_docs)]
 extern crate alloc;
 
@@ -18,7 +20,7 @@ pub struct AtsIntc(usize);
 
 impl AtsIntc {
     ///
-    pub fn new(base_addr: usize) -> Self {
+    pub const fn new(base_addr: usize) -> Self {
         Self(base_addr)
     }
 

@@ -1,4 +1,3 @@
-workspace = { members = ["ats-intc-pac"] }
 [package]
 name = "ats-intc"
 version = "0.1.0"

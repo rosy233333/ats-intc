@@ -34,10 +34,17 @@ unsafe impl Send for TaskRef {}
 unsafe impl Sync for TaskRef {}
 
 impl TaskRef {
+    /// Create a virtual task
+    pub const unsafe fn const_task(ptr: usize) -> Self {
+        Self {
+            ptr: NonNull::new(ptr as *mut Task).unwrap()
+        }
+    }
+
     /// Safety: The pointer must have been obtained with `Task::as_ptr`
     pub unsafe fn from_ptr(ptr: *const Task) -> Self {
         Self {
-            ptr: NonNull::new_unchecked(ptr as *mut Task),
+            ptr: NonNull::new(ptr as *mut Task).unwrap(),
         }
     }
 
