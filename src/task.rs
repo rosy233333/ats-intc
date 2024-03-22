@@ -1,26 +1,27 @@
 //! Coroutine Control Block structures for more control.
 //!
 
-
+use crate::{new_waker, AtsIntc};
 use alloc::{boxed::Box, sync::Arc};
 use core::{
-    borrow::BorrowMut, future::Future, pin::Pin, ptr::NonNull, sync::atomic::{AtomicU32, Ordering}, task::{Context, Poll}
+    future::Future,
+    pin::Pin,
+    ptr::NonNull,
+    sync::atomic::{AtomicU32, Ordering},
+    task::{Context, Poll},
 };
 use crossbeam::atomic::AtomicCell;
 
-use crate::{new_waker, AtsDriver};
-
-/// 
+///
 #[repr(u32)]
 pub enum TaskState {
     ///
     Ready = 1 << 0,
-    /// 
+    ///
     Running = 1 << 1,
     ///
-    Pending = 1 << 2
+    Pending = 1 << 2,
 }
-
 
 /// The pointer of `Task`
 #[repr(transparent)]
@@ -33,7 +34,6 @@ unsafe impl Send for TaskRef {}
 unsafe impl Sync for TaskRef {}
 
 impl TaskRef {
-
     /// Safety: The pointer must have been obtained with `Task::as_ptr`
     pub unsafe fn from_ptr(ptr: *const Task) -> Self {
         Self {
@@ -59,7 +59,7 @@ pub enum TaskType {
     Process,
     ///
     Syscall,
-    /// 
+    ///
     AsyncSyscall,
     ///
     Other,
@@ -68,13 +68,15 @@ pub enum TaskType {
 /// The `Task` is stored in heap by using `Arc`.
 #[repr(C)]
 pub struct Task {
-    /// 
+    ///
     pub state: AtomicU32,
     ///
     pub priority: AtomicU32,
     ///
+    pub atsintc: &'static AtsIntc,
+    ///
     pub task_type: TaskType,
-    /// 
+    ///
     pub fut: AtomicCell<Pin<Box<dyn Future<Output = i32> + 'static + Send + Sync>>>,
 }
 
@@ -84,11 +86,13 @@ impl Task {
         fut: Pin<Box<dyn Future<Output = i32> + 'static + Send + Sync>>,
         priority: u32,
         task_type: TaskType,
+        atsintc: &'static AtsIntc,
     ) -> TaskRef {
         let task = Arc::new(Self {
             state: AtomicU32::new(TaskState::Ready as _),
             priority: AtomicU32::new(priority),
             task_type,
+            atsintc,
             fut: AtomicCell::new(fut),
         });
         task.as_ref()
@@ -104,17 +108,16 @@ impl Task {
         unsafe { TaskRef::from_ptr(Arc::into_raw(self)) }
     }
 
-    /// 
+    ///
     pub fn from_ref(task_ref: TaskRef) -> Arc<Self> {
         let raw_ptr = task_ref.as_ptr();
         unsafe { Arc::from_raw(raw_ptr) }
     }
 
     /// poll the inner future
-    pub fn poll_inner(self: Arc<Self>, hw: AtsDriver, process_id: usize) -> Poll<i32> {
-        let waker = unsafe { new_waker(self.clone().as_ref(), hw, process_id) };
+    pub fn poll_inner(self: Arc<Self>, hw: AtsIntc) -> Poll<i32> {
+        let waker = unsafe { new_waker(self.clone().as_ref(), hw) };
         let mut context = Context::from_waker(&waker);
         unsafe { (&mut *self.fut.as_ptr()).as_mut().poll(&mut context) }
     }
 }
-

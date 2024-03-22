@@ -9,28 +9,16 @@ edition = "2021"
 [dependencies]
 crossbeam = { version = "0.8", default-features = false, features = ["alloc"] }
 log = "0.4.17"
-heapless = { version = "0.8", features = ["mpmc_large"], optional = true }
-rv-plic = { git = "https://github.com/duskmoon314/rv-plic", optional = true }
 spin = { version = "0.9", optional = true }
 
 ats-intc-pac = { path = "./ats-intc-pac"}
 
 
 [features]
-# The software simulation with lock, but it use the atomic operation
-locked-simul = ["heapless", "rv-plic", "spin"]
-# The software simulation without lock
-lock-free-simul = ["heapless", "rv-plic", "spin"]
-# Only the driver 
-no-simul = []
 
-prio-level-4 = []
 
-prio-level-8 = []
 
-prio-level-16 = []
-
-default = ["no-simul", "prio-level-8"]
+default = []
 
 
 
