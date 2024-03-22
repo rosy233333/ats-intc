@@ -10,7 +10,7 @@ impl core::fmt::Debug for crate::generic::Reg<DequeueSpec> {
         core::fmt::Debug::fmt(&self.read(), f)
     }
 }
-#[doc = "Deque position of the Async task scheduler\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`dequeue::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
+#[doc = "The priority queue dequeue register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`dequeue::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct DequeueSpec;
 impl crate::RegisterSpec for DequeueSpec {
     type Ux = u64;

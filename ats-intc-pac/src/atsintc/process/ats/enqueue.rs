@@ -6,7 +6,7 @@ impl core::fmt::Debug for crate::generic::Reg<EnqueueSpec> {
     }
 }
 impl W {}
-#[doc = "Enqueue position of the Async task scheduler\n\nYou can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`enqueue::W`](W). See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
+#[doc = "The priority queue enqueue registers\n\nYou can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`enqueue::W`](W). See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct EnqueueSpec;
 impl crate::RegisterSpec for EnqueueSpec {
     type Ux = u64;
