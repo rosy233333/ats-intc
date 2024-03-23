@@ -122,7 +122,7 @@ impl Task {
     }
 
     /// poll the inner future
-    pub fn poll_inner(self: Arc<Self>) -> Poll<i32> {
+    pub fn poll_inner(self: &Arc<Self>) -> Poll<i32> {
         let waker = unsafe { new_waker(self.clone().as_ref(), self.atsintc) };
         let mut context = Context::from_waker(&waker);
         unsafe { (&mut *self.fut.as_ptr()).as_mut().poll(&mut context) }
