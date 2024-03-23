@@ -16,7 +16,7 @@ const VTABLE: RawWakerVTable = RawWakerVTable::new(clone, wake, wake, drop);
 #[derive(Clone, Copy)]
 struct WakerData {
     task_ref: TaskRef,
-    hw: AtsIntc,
+    hw: &'static AtsIntc,
 }
 
 impl WakerData {
@@ -39,7 +39,7 @@ unsafe fn wake(p: *const ()) {
 unsafe fn drop(_p: *const ()) {}
 
 ///
-pub unsafe fn new_waker(task_ref: TaskRef, hw: AtsIntc) -> Waker {
+pub unsafe fn new_waker(task_ref: TaskRef, hw: &'static AtsIntc) -> Waker {
     let data = Arc::new(WakerData { task_ref, hw }).as_ref() as *const WakerData as *const ();
     Waker::from_raw(RawWaker::new(data, &VTABLE))
 }
