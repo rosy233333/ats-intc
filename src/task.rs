@@ -1,7 +1,7 @@
 //! Coroutine Control Block structures for more control.
 //!
 
-use crate::{new_waker, AtsIntc};
+use crate::{from_task, AtsIntc};
 use alloc::{boxed::Box, sync::Arc};
 use core::{
     future::Future,
@@ -51,6 +51,24 @@ impl TaskRef {
     /// The returned pointer
     pub fn as_ptr(self) -> *const Task {
         self.ptr.as_ptr()
+    }
+
+    ///
+    #[inline(always)]
+    pub fn poll(self) -> Poll<i32> {
+        unsafe {
+            let waker = from_task(self);
+            let mut cx = Context::from_waker(&waker);
+            let task = Task::from_ref(self);
+            let future = &mut *task.fut.as_ptr();
+            match future.as_mut().poll(&mut cx) {
+                Poll::Ready(res) => Poll::Ready(res),
+                Poll::Pending => {
+                    task.as_ref();
+                    Poll::Pending
+                },
+            }
+        }
     }
 }
 
@@ -120,11 +138,18 @@ impl Task {
         let raw_ptr = task_ref.as_ptr();
         unsafe { Arc::from_raw(raw_ptr) }
     }
+}
 
-    /// poll the inner future
-    pub fn poll_inner(self: &Arc<Self>) -> Poll<i32> {
-        let waker = unsafe { new_waker(self.clone().as_ref(), self.atsintc) };
-        let mut context = Context::from_waker(&waker);
-        unsafe { (&mut *self.fut.as_ptr()).as_mut().poll(&mut context) }
+/// Wake a task by `TaskRef`.
+///
+/// You can obtain a `TaskRef` from a `Waker` using [`task_from_waker`].
+#[inline(always)]
+pub fn wake_task(task_ref: TaskRef) {
+    unsafe {
+        let task_ptr = task_ref.as_ptr();
+        let priority = (*task_ptr).priority.load(Ordering::Relaxed);
+        let atsintc = (*task_ptr).atsintc;
+        atsintc.ps_push(task_ref, priority as _);
     }
 }
+

@@ -12,7 +12,7 @@ mod waker;
 
 use ats_intc_pac::*;
 pub use task::*;
-pub use waker::*;
+use waker::*;
 
 /// The Async Task Scheduler and Interrupt controller
 #[derive(Debug, Clone, Copy)]
