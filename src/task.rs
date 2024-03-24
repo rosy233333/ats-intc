@@ -25,7 +25,7 @@ pub enum TaskState {
 
 /// The pointer of `Task`
 #[repr(transparent)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct TaskRef {
     ptr: NonNull<Task>,
 }
@@ -35,21 +35,21 @@ unsafe impl Sync for TaskRef {}
 
 impl TaskRef {
     /// Create a virtual task
-    pub const unsafe fn const_task(ptr: usize) -> Self {
+    pub const unsafe fn virt_task(ptr: usize) -> Self {
         Self {
             ptr: NonNull::new(ptr as *mut Task).unwrap()
         }
     }
 
     /// Safety: The pointer must have been obtained with `Task::as_ptr`
-    pub unsafe fn from_ptr(ptr: *const Task) -> Self {
+    pub(crate) unsafe fn from_ptr(ptr: *const Task) -> Self {
         Self {
             ptr: NonNull::new(ptr as *mut Task).unwrap(),
         }
     }
 
     /// The returned pointer
-    pub fn as_ptr(self) -> *const Task {
+    pub(crate) fn as_ptr(&self) -> *const Task {
         self.ptr.as_ptr()
     }
 
@@ -57,7 +57,7 @@ impl TaskRef {
     #[inline(always)]
     pub fn poll(self) -> Poll<i32> {
         unsafe {
-            let waker = from_task(self);
+            let waker = from_task(self.clone());
             let mut cx = Context::from_waker(&waker);
             let task = Task::from_ref(self);
             let future = &mut *task.fut.as_ptr();
@@ -129,12 +129,12 @@ impl Task {
     }
 
     ///
-    pub fn as_ref(self: Arc<Self>) -> TaskRef {
+    fn as_ref(self: Arc<Self>) -> TaskRef {
         unsafe { TaskRef::from_ptr(Arc::into_raw(self)) }
     }
 
     ///
-    pub fn from_ref(task_ref: TaskRef) -> Arc<Self> {
+    fn from_ref(task_ref: TaskRef) -> Arc<Self> {
         let raw_ptr = task_ref.as_ptr();
         unsafe { Arc::from_raw(raw_ptr) }
     }

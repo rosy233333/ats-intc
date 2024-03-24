@@ -77,7 +77,6 @@ impl core::fmt::Debug for Atsintc {
 }
 #[doc = "Asynchronous task scheduler, IPC controller and Interrupt controller description"]
 pub mod atsintc;
-#[no_mangle]
 #[doc = r" All the peripherals."]
 #[allow(non_snake_case)]
 pub struct Peripherals {
