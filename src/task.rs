@@ -49,7 +49,7 @@ impl TaskRef {
     }
 
     /// The returned pointer
-    pub(crate) fn as_ptr(&self) -> *const Task {
+    pub fn as_ptr(&self) -> *const Task {
         self.ptr.as_ptr()
     }
 
