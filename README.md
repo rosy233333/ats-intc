@@ -1,6 +1,8 @@
 # ats-intc
 
-This is the driver of ats-intc(Asynchronous task scheduler and Interrupt controller)
+This is the driver of ats-intc(Asynchronous task scheduler and Interrupt controller).
+
+**If you don't want to use the ats-intc, you can use your own software scheduler and using the structure of `TaskRef`, `Task` and `Waker` in this crates.**
 
 ### Driver
 
