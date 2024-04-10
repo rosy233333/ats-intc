@@ -4,6 +4,7 @@
 #![no_std]
 #![feature(const_nonnull_new)]
 #![feature(const_option)]
+#![feature(waker_getters)]
 #![deny(missing_docs)]
 extern crate alloc;
 

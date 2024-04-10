@@ -53,6 +53,12 @@ impl TaskRef {
         self.ptr.as_ptr()
     }
 
+    /// Get TaskRef from Context
+    pub fn from_cx(cx: &mut Context) -> Self {
+        let ptr = cx.waker().as_raw().data() as _;
+        unsafe { Self::virt_task(ptr) }
+    }
+
     ///
     #[inline(always)]
     pub fn poll(self) -> Poll<i32> {
