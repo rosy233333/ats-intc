@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 crossbeam = { version = "0.8", default-features = false, features = ["alloc"] }
 log = "0.4.17"
+heapless = { version = "0.8", features = ["mpmc_large"], optional = true }
 spin = { version = "0.9", optional = true }
 
 ats-intc-pac = { path = "./ats-intc-pac"}
@@ -15,9 +16,16 @@ ats-intc-pac = { path = "./ats-intc-pac"}
 
 [features]
 
+locked-simul = ["dep:heapless"]
+lock-free-simul = ["dep:heapless"]
+prio-level-4 = []
+prio-level-8 = []
+prio-level-16 = []
+svd2rust-impl = []
+simple-impl = []
+software-impl = ["lock-free-simul", "prio-level-16"]
 
-
-default = []
+default = ["simple-impl"]
 
 
 
